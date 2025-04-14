@@ -41,7 +41,7 @@ def get_problem(instances_folder : str, problem_index : int) -> ioh.ProblemClass
     # def transform_objectives(y: float, instance_id:int) -> float:
     #     return y + OptimumValue
     f = ioh.wrap_problem(lambda x: gnbg.fitness(x) - OptimumValue, f"GNBG_{instances_folder}_f{problem_index}", ioh.ProblemClass.REAL, Dimension, 0, lb=MinCoordinate, ub=MaxCoordinate,
-                 calculate_objective=lambda x,y : ioh.RealSolution(OptimumPosition[0], 0))#, transform_objectives=transform_objectives)
+                 calculate_objective=lambda x,y : ioh.RealSolution(OptimumPosition[0], 0),  optimization_type=ioh.OptimizationType.MIN)#, transform_objectives=transform_objectives)
     f.set_id(problem_index)
     return f
 
@@ -58,9 +58,13 @@ def get_problems(instances_folder :str, problem_indices : int | list[int]) -> li
         list[ioh.ProblemClass.REAL]: A list of problem instances corresponding to the specified indices.
         """
     problems = []
-    if( isinstance(problem_indices, int)):
-        problem_indices = list(range(problem_indices))
+    if(isinstance(problem_indices, int)):
+        problem_indices = list(range(1,problem_indices+1))
 
     for problem_index in problem_indices:
-        problems.append(get_problem(instances_folder, problem_index))
+        try:
+            problems.append(get_problem(instances_folder, problem_index))
+        except Exception as e:
+            print(f"Error loading problem instance {problem_index}: {e}")
+            continue
     return problems
