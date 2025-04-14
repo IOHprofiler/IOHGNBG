@@ -28,6 +28,4 @@ This work has been established as a collaboration between:
 * Diederick Vermetten 
 * Catalin-Viorel Dinu
 
-## Cite Us
 
-Citation information coming soon!
