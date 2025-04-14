@@ -27,6 +27,6 @@ jobs:
         pip install -e .[test] -v
     - name: Test with coverage
       run: |
-        coverage run -m --source=iohclustering unittest discover
+        coverage run -m --source=iohgnbg unittest discover
         coverage report -m 
     
