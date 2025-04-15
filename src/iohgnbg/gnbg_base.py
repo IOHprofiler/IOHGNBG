@@ -9,6 +9,22 @@ GNBG_COMPETITION_INSTANCES = "GECCO_2025"
 
 
 def get_problem(problem_index : int, instances_folder : str | None = None) -> ioh.ProblemClass.REAL:
+    """
+    Retrieves and wraps a GNBG problem instance for optimization.
+    Args:
+        problem_index (int): The index of the problem to retrieve.
+        instances_folder (str | None, optional): The folder containing the problem instances.
+            If None, the default competition instances folder is used.
+    Returns:
+        ioh.ProblemClass.REAL: A wrapped GNBG problem instance ready for optimization.
+    Notes:
+        - The function loads problem data from a `.mat` file corresponding to the given
+            problem index.
+        - It constructs a GNBG problem instance using the loaded data and wraps it
+            using the `ioh.wrap_problem` function.
+        - The wrapped problem is configured for minimization and includes bounds,
+            dimension, and other problem-specific parameters.
+    """
     if(instances_folder is None):
         instances_folder = os.path.join(get_static_package_path(), GNBG_COMPETITION_INSTANCES)
         problem_name = f"GNBG_{GNBG_COMPETITION_INSTANCES}_f{problem_index}"
@@ -67,6 +83,27 @@ def get_problem(problem_index : int, instances_folder : str | None = None) -> io
     return f
 
 def get_problems(problem_indices : int | list[int], instances_folder :str | None = None) -> list[ioh.ProblemClass.REAL]:
+    """
+    Retrieve a list of problem instances based on the provided indices.
+
+    Args:
+        problem_indices (int | list[int]): An integer specifying the number of problems to retrieve 
+            (generating indices from 1 to the given number), or a list of specific problem indices.
+        instances_folder (str | None, optional): The folder containing problem instance files. 
+            Defaults to None.
+
+    Returns:
+        list[ioh.ProblemClass.REAL]: A list of problem instances retrieved based on the given indices.
+
+    Raises:
+        Exception: If an error occurs while loading a specific problem instance, it is caught, 
+            and an error message is printed for that instance.
+
+    Notes:
+        - If `problem_indices` is an integer, it is converted to a list of indices from 1 to `problem_indices`.
+        - Errors encountered while loading specific problem instances are logged, and the process 
+            continues for the remaining indices.
+    """
     problems = []
     if(isinstance(problem_indices, int)):
         problem_indices = list(range(1,problem_indices+1))

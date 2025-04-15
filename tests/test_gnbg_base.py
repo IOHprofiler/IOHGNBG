@@ -3,70 +3,92 @@ import tempfile
 import os
 from unittest.mock import patch, MagicMock
 from scipy.io import savemat
-from iohgnbg import get_problem, get_problems
+from iohgnbg import get_problem, get_problems, create_problem, GNBG_COMPETITION_INSTANCES
 import numpy as np
 
-
-
-
 class TestGNBGBase(unittest.TestCase):
+    
+    def test_get_problem_valid(self):
 
-    @patch("iohgnbg.gnbg_base.loadmat")
-    def test_get_problem_file_not_found(self, mock_loadmat):
-        # Simulate file not found error
-        mock_loadmat.side_effect = FileNotFoundError("File not found")
-
-        # Call the function and assert exception
-        instances_folder = "/path/to/instances"
+        # Test get_problem with valid data
         problem_index = 1
+
+        problem = get_problem(problem_index)
+
+        self.assertIsNotNone(problem)
+        self.assertEqual(problem.meta_data.name, f"GNBG_{GNBG_COMPETITION_INSTANCES}_f{problem_index}")
+    
+    def test_get_problem_invalid(self):
+
+        # Test get_problem with valid data
+        problem_index = 25
+
         with self.assertRaises(FileNotFoundError):
-            get_problem(instances_folder, problem_index)
+            problem = get_problem(problem_index)
 
-    @patch("iohgnbg.gnbg_base.loadmat")
-    def test_get_problem_invalid_data(self, mock_loadmat):
-        # Simulate invalid data in the .mat file
-        mock_loadmat.return_value = {'GNBG': None}
+        
 
-        # Call the function and assert exception
-        instances_folder = "/path/to/instances"
-        problem_index = 1
-        with self.assertRaises(TypeError):
-            get_problem(instances_folder, problem_index)
+    def test_get_problems_with_list(self):
+        # Mock get_problem to return dummy problems
+        
+        problem_indices = [1, 2, 3]
+        problems = get_problems(problem_indices)
+        self.assertEqual(len(problems), 3)
+        self.assertEqual(problems[0].meta_data.name, f"GNBG_{GNBG_COMPETITION_INSTANCES}_f{1}")
+        self.assertEqual(problems[1].meta_data.name, f"GNBG_{GNBG_COMPETITION_INSTANCES}_f{2}")
+        self.assertEqual(problems[2].meta_data.name, f"GNBG_{GNBG_COMPETITION_INSTANCES}_f{3}")
 
-    @patch("iohgnbg.gnbg_base.get_problem")
-    def test_get_problems_with_range(self, mock_get_problem):
-        # Mock get_problem to return a dummy problem
-        mock_problem = MagicMock()
-        mock_get_problem.return_value = mock_problem
+    def test_get_problems_with_int(self):
+        # Mock get_problem to return dummy problems
+        
+        problem_indices = 24
+        problems = get_problems(problem_indices)
+        self.assertEqual(len(problems), 24)
+        self.assertEqual(problems[0].meta_data.name, f"GNBG_{GNBG_COMPETITION_INSTANCES}_f{1}")
+        self.assertEqual(problems[1].meta_data.name, f"GNBG_{GNBG_COMPETITION_INSTANCES}_f{2}")
+        self.assertEqual(problems[22].meta_data.name, f"GNBG_{GNBG_COMPETITION_INSTANCES}_f{23}")
+        self.assertEqual(problems[23].meta_data.name, f"GNBG_{GNBG_COMPETITION_INSTANCES}_f{24}")
 
-        # Call the function
-        instances_folder = "/path/to/instances"
-        problem_indices = 3
-        result = get_problems(instances_folder, problem_indices)
+    def test_create_problem_valid(self):
+        # Test create_problem with valid parameters
+        problem = create_problem(
+            MaxEvals=10000,
+            AcceptanceThreshold=1e-8,
+            Dimension=2,
+            CompNum=1,
+            MinCoordinate=-1,
+            MaxCoordinate=1,
+            CompMinPos=np.array([[0.0, 0.0]]),
+            CompSigma=np.array([[0.1]]),
+            CompH=np.array([[0.0, 1.0]]),
+            Mu=np.array([[0.0, 0.0]]),
+            Omega=np.array([[1.0, 0.0, 0.0, 0.0]]),
+            Lambda=np.array([[1.0]]),
+            RotationMatrix=np.array([[[1.0], [0.0]], [[0.0], [1.0]]]),
+            OptimumValue=0.1,
+            OptimumPosition=np.array([[0.0, 0.0]])
+        )
 
-        # Assertions
-        self.assertEqual(len(result), 3)
-        mock_get_problem.assert_any_call(instances_folder, 1)
-        mock_get_problem.assert_any_call(instances_folder, 2)
-        mock_get_problem.assert_any_call(instances_folder, 3)
+        self.assertIsNotNone(problem)
+        self.assertEqual(problem.meta_data.name, "GNBG_Custom")
+        self.assertEqual(problem.meta_data.n_variables, 2)
 
-    @patch("iohgnbg.gnbg_base.get_problem")
-    def test_get_problems_with_list(self, mock_get_problem):
-        # Mock get_problem to return a dummy problem
-        mock_problem = MagicMock()
-        mock_get_problem.return_value = mock_problem
-
-        # Call the function
-        instances_folder = "/path/to/instances"
-        problem_indices = [1, 3, 5]
-        result = get_problems(instances_folder, problem_indices)
-
-        # Assertions
-        self.assertEqual(len(result), 3)
-        mock_get_problem.assert_any_call(instances_folder, 1)
-        mock_get_problem.assert_any_call(instances_folder, 3)
-        mock_get_problem.assert_any_call(instances_folder, 5)
+    def test_create_problem_invalid_shapes(self):
+        # Test create_problem with invalid parameter shapes
+        with self.assertRaises(AssertionError):
+            create_problem(
+                CompMinPos=np.array([[0.0]]),  # Invalid shape
+                CompSigma=np.array([[0.1]]),
+                CompH=np.array([[0.0, 1.0]]),
+                Mu=np.array([[0.0, 0.0]]),
+                Omega=np.array([[1.0, 0.0, 0.0, 0.0]]),
+                Lambda=np.array([[1.0]]),
+                RotationMatrix=np.array([[[1.0, 0.0], [0.0, 1.0]]]),
+                OptimumValue=0.1,
+                OptimumPosition=np.array([[0.0, 0.0]])
+            )
 
 
 if __name__ == "__main__":
     unittest.main()
+    
