@@ -51,9 +51,3 @@ We acknowledge the foundational work on the GNBG generator proposed in the paper
 
 The basic instances provided are from the [GECCO Competition 2025](https://github.com/rohitsalgotra/GNBG-II). We also offer participants the possibility to use IOHprofiler to log their experiments.
 
-
-This work has been established as a collaboration between:
-* Diederick Vermetten 
-* Catalin-Viorel Dinu
-
-
